@@ -1,0 +1,2 @@
+# Power_charging_simulation_for_Arknight_Endfield
+模拟明日方舟：终末地中的发电耗电过程，以验证极限发电方案是否会中途停电
