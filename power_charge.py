@@ -1,12 +1,21 @@
 import matplotlib.pyplot as plt
+import math
 
+default_power = 12  # 使用的分流器数量
+charge_cycle = 40 # 一个电池可以让热能池工作40秒
 power_maximum = 100000
 power_consumpsion = 5475  
 power_generation = 5700
 power_per_battery = 1100
-power_increase = power_generation - power_consumpsion
-power_decrease = power_consumpsion - (power_generation - power_per_battery)
+power_increase = power_generation - power_consumpsion  # 发电时每秒增加的电量
+power_decrease = power_consumpsion - (power_generation - power_per_battery) # 不发电时每秒减少的电量
 
+conveyor_power_minimum = (charge_cycle * power_per_battery) / (pow(2, default_power + 1))  # 分流器最末端的发电功率
+binary_numbers = bin(math.ceil(power_decrease / conveyor_power_minimum) + 1)[2:]  # 所需发电功率除以分流器最末端功率得到的倍数向上取整后，转化为二进制数
+binary_conveyor = binary_numbers.zfill(default_power)
+print(f"二分传送带设置：{binary_conveyor}")
+
+    
 power_current = 0
 battery_conveyed = 3
 time = 0  # 离散循环时间
@@ -31,14 +40,14 @@ class Conveyor:
 class Generator:
     """发电机"""
     def __init__(self):
-        self.cycle = 40
+        self.cycle = charge_cycle
         self.charge_timer = 0
         self.charge_enable = True
         
     def run(self):
         global power_current, battery_conveyed, count
         
-        if self.charge_enable: 
+        if self.charge_enable: # 在发电
             power_current = power_current + power_increase
             if power_current > power_maximum:
                 power_current = power_maximum
@@ -46,13 +55,13 @@ class Generator:
             if self.charge_timer >= self.cycle:
                 self.charge_enable = False
                 self.charge_timer = 0    
-        elif battery_conveyed > 0:
+        elif battery_conveyed > 0: # 不在发电但有电池
             power_current = power_current - power_decrease
             if power_current <= 0:
                 power_current = 0
             self.charge_enable = True
             battery_conveyed = battery_conveyed - 1
-        else:
+        else: #不在发电且没有电池
             power_last = power_current
             power_current = power_current - power_decrease
             if power_current <= 0:
@@ -61,21 +70,17 @@ class Generator:
                 count = count + 1
 
 if __name__ == '__main__':
-    default_power = 12
-    binary_numbers = "10100100"
-    
+    # 初始化传送带
     conveyors = [Conveyor(-1) for i in range(default_power)] 
-    for i, binary_number in enumerate(binary_numbers.zfill(default_power)):
+    for i, binary_number in enumerate(binary_conveyor):
         if binary_number == "1":
             conveyors[i].set_period(pow(2, i + 2))
         elif binary_number != "0":
             print("二分传送带格式错误")
             break
             
-
+    # 初始化发电机
     generator = Generator()
-    
-    power_current = power_maximum
     
     with open("output.txt", "w", encoding="utf-8") as file:
         file.write("开始\n")
