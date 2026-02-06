@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 power_maximum = 100000
-power_consumpsion = 5565  
+power_consumpsion = 5475  
 power_generation = 5700
 power_per_battery = 1100
 power_increase = power_generation - power_consumpsion
@@ -16,10 +16,15 @@ class Conveyor:
     """传送带，按一定时间周期送电池"""
     def __init__(self, period):
         self.period = period #传送周期
+    
+    def set_period(self, period):
+        self.period = period
         
     def run(self):
         global battery_conveyed
         
+        if self.period == -1: return
+            
         if time % self.period == 0:
             battery_conveyed = battery_conveyed + 1        
 
@@ -56,10 +61,18 @@ class Generator:
                 count = count + 1
 
 if __name__ == '__main__':
-    conveyor_1 = Conveyor(64)
-    conveyor_2 = Conveyor(256)
-    conveyor_3 = Conveyor(512)
-    conveyor_4 = Conveyor(2048)
+    default_power = 12
+    binary_numbers = "10100100"
+    
+    conveyors = [Conveyor(-1) for i in range(default_power)] 
+    for i, binary_number in enumerate(binary_numbers.zfill(default_power)):
+        if binary_number == "1":
+            conveyors[i].set_period(pow(2, i + 2))
+        elif binary_number != "0":
+            print("二分传送带格式错误")
+            break
+            
+
     generator = Generator()
     
     power_current = power_maximum
@@ -70,10 +83,8 @@ if __name__ == '__main__':
     time_line = range(0, 16385, 1)
     power_current_line = []   
     for time in time_line:
-        conveyor_1.run()
-        conveyor_2.run()
-        conveyor_3.run()
-        conveyor_4.run()
+        for conveyor in conveyors:
+            conveyor.run()
         generator.run()
         
         power_current_line.append(power_current)    
