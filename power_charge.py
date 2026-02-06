@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import math
+import sys
 
 default_power = 12  # 使用的分流器数量
 charge_cycle = 40 # 一个电池可以让热能池工作40秒
@@ -77,7 +78,7 @@ if __name__ == '__main__':
             conveyors[i].set_period(pow(2, i + 2))
         elif binary_number != "0":
             print("二分传送带格式错误")
-            break
+            sys.exit()
             
     # 初始化发电机
     generator = Generator()
