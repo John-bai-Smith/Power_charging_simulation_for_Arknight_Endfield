@@ -4,6 +4,7 @@ import sys
 
 default_power = 12  # 使用的分流器数量
 charge_cycle = 40 # 一个电池可以让热能池工作40秒
+
 power_maximum = 100000
 power_consumpsion = 5475  
 power_generation = 5700
@@ -11,14 +12,17 @@ power_per_battery = 1100
 power_increase = power_generation - power_consumpsion  # 发电时每秒增加的电量
 power_decrease = power_consumpsion - (power_generation - power_per_battery) # 不发电时每秒减少的电量
 
+redundancy = 2  # 多发的冗余电量
 conveyor_power_minimum = (charge_cycle * power_per_battery) / (pow(2, default_power + 1))  # 分流器最末端的发电功率
-binary_numbers = bin(math.ceil(power_decrease / conveyor_power_minimum) + 1)[2:]  # 所需发电功率除以分流器最末端功率得到的倍数向上取整后，转化为二进制数
+times_to_minimum = math.ceil(power_decrease / conveyor_power_minimum) + redundancy
+theoretical_power = times_to_minimum * conveyor_power_minimum + (power_generation - power_per_battery)
+binary_numbers = bin(times_to_minimum)[2:]  # 所需发电功率除以分流器最末端功率得到的倍数向上取整后，转化为二进制数
 binary_conveyor = binary_numbers.zfill(default_power)
 print(f"二分传送带设置：{binary_conveyor}")
-
+print(f"理论发电功率：{theoretical_power}")
     
-power_current = 0
-battery_conveyed = 3
+power_current = power_maximum
+battery_conveyed = 2
 time = 0  # 离散循环时间
 count = 0 # 停电次数
 
